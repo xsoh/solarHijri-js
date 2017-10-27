@@ -2,193 +2,164 @@
   Expose functions.
 */
 module.exports =
-  { toJalaali: toJalaali
+  { toSolarHijri: toSolarHijri
   , toGregorian: toGregorian
-  , isValidJalaaliDate: isValidJalaaliDate
-  , isLeapJalaaliYear: isLeapJalaaliYear
-  , jalaaliMonthLength: jalaaliMonthLength
-  , jalCal: jalCal
-  , j2d: j2d
-  , d2j: d2j
-  , g2d: g2d
-  , d2g: d2g
+  , isValidSolarHijriDate: isValidSolarHijriDate
+  , isLeapSolarHijriYear: isLeapSolarHijriYear
+  , solarHijriMonthLength: solarHijriMonthLength
+  , solarHijriCal: solarHijriCal
+  , h2j: h2j // solarHijri to Julian
+  , j2h: j2h // Julian to solarHijri
+  , g2j: g2j // Gregoria to Julian
+  , j2g: j2g // Julian to Gregoria
   }
 
 /*
-  Converts a Gregorian date to Jalaali.
+  Converts a Gregorian date to SolarHijri.
 */
-function toJalaali(gy, gm, gd) {
+function toSolarHijri(gy, gm, gd) {
   if (Object.prototype.toString.call(gy) === '[object Date]') {
     gd = gy.getDate()
     gm = gy.getMonth() + 1
     gy = gy.getFullYear()
   }
-  return d2j(g2d(gy, gm, gd))
+  return j2h(g2j(gy, gm, gd))
 }
 
 /*
-  Converts a Jalaali date to Gregorian.
+  Converts a SolarHijri date to Gregorian.
 */
-function toGregorian(jy, jm, jd) {
-  return d2g(j2d(jy, jm, jd))
+function toGregorian(hy, hm, hd) {
+  return j2g(h2j(hy, hm, hd))
 }
 
 /*
-  Checks whether a Jalaali date is valid or not.
+  Checks whether a SolarHijri date is valid or not.
 */
-function isValidJalaaliDate(jy, jm, jd) {
-  return  jy >= -61 && jy <= 3177 &&
-          jm >= 1 && jm <= 12 &&
-          jd >= 1 && jd <= jalaaliMonthLength(jy, jm)
+function isValidSolarHijriDate(hy, hm, hd) {
+  return  hy >= -61 && hy <= 3177 &&
+          hm >= 1 && hm <= 12 &&
+          hd >= 1 && hd <= solarHijriMonthLength(hy, hm)
 }
 
 /*
   Is this a leap year or not?
 */
-function isLeapJalaaliYear(jy) {
-  return jalCal(jy).leap === 0
+function isLeapSolarHijriYear(hy) {
+  return solarHijriCal(hy).leap == true
 }
 
 /*
-  Number of days in a given month in a Jalaali year.
+  Number of days in a given month in a SolarHijri year.
 */
-function jalaaliMonthLength(jy, jm) {
-  if (jm <= 6) return 31
-  if (jm <= 11) return 30
-  if (isLeapJalaaliYear(jy)) return 30
-  return 29
+function solarHijriMonthLength(hy, hm) {
+  if (hm <= 5) return 30
+  if (hm >= 7) return 31
+  // here where hm = 6.
+  if (isLeapSolarHijriYear(hy)) {
+    return 30
+  } else {
+    return 29
+  }
 }
 
 /*
-  This function determines if the Jalaali (Persian) year is
+  This function determines if the SolarHijri year is
   leap (366-day long) or is the common year (365 days), and
-  finds the day in March (Gregorian calendar) of the first
-  day of the Jalaali year (jy).
+  finds the day in September (Gregorian calendar) of the first
+  day of the SolarHijri year (hy).
 
-  @param jy Jalaali calendar year (-61 to 3177)
+  @param hy SolarHijri calendar year (-61 to 3177)
   @return
     leap: number of years since the last leap year (0 to 4)
-    gy: Gregorian year of the beginning of Jalaali year
-    march: the March day of Farvardin the 1st (1st day of jy)
-  @see: http://www.astro.uni.torun.pl/~kb/Papers/EMP/PersianC-EMP.htm
-  @see: http://www.fourmilab.ch/documents/calendar/
+    gy: Gregorian year of the beginning of SolarHijri year
+    startDate: the 1st Libra (Mizān) date which matches 23 September of the givin
+    Solar Hijri year (1st day of hy)
 */
-function jalCal(jy) {
-  // Jalaali years starting the 33-year rule.
-  var breaks =  [ -61, 9, 38, 199, 426, 686, 756, 818, 1111, 1181, 1210
-                , 1635, 2060, 2097, 2192, 2262, 2324, 2394, 2456, 3178
-                ]
-    , bl = breaks.length
-    , gy = jy + 621
-    , leapJ = -14
-    , jp = breaks[0]
-    , jm
-    , jump
-    , leap
-    , leapG
-    , march
-    , n
-    , i
+function solarHijriCal(hy) {
+  var gy = hy + 621,
+    pgy = gy + 1
 
-  if (jy < jp || jy >= breaks[bl - 1])
-    throw new Error('Invalid Jalaali year ' + jy)
-
-  // Find the limiting years for the Jalaali year jy.
-  for (i = 1; i < bl; i += 1) {
-    jm = breaks[i]
-    jump = jm - jp
-    if (jy < jm)
-      break
-    leapJ = leapJ + div(jump, 33) * 8 + div(mod(jump, 33), 4)
-    jp = jm
-  }
-  n = jy - jp
-
-  // Find the number of leap years from AD 621 to the beginning
-  // of the current Jalaali year in the Persian calendar.
-  leapJ = leapJ + div(n, 33) * 8 + div(mod(n, 33) + 3, 4)
-  if (mod(jump, 33) === 4 && jump - n === 4)
-    leapJ += 1
-
-  // And the same in the Gregorian calendar (until the year gy).
-  leapG = div(gy, 4) - div((div(gy, 100) + 1) * 3, 4) - 150
-
-  // Determine the Gregorian date of Farvardin the 1st.
-  march = 20 + leapJ - leapG
-
-  // Find how many years have passed since the last leap year.
-  if (jump - n < 6)
-    n = n - jump + div(jump + 4, 33) * 33
-  leap = mod(mod(n + 1, 33) - 1, 4)
-  if (leap === -1) {
-    leap = 4
-  }
-
-  return  { leap: leap
+  return  { leap: ((pgy % 4 == 0) && (pgy % 100 != 0)) || (pgy % 400 == 0)
           , gy: gy
-          , march: march
+          , startDate: 23 // 23 Sep
           }
 }
 
 /*
-  Converts a date of the Jalaali calendar to the Julian Day number.
+  Converts a date of the SolarHijri calendar to the Julian Day number.
 
-  @param jy Jalaali year (1 to 3100)
-  @param jm Jalaali month (1 to 12)
-  @param jd Jalaali day (1 to 29/31)
+  @param hy SolarHijri year (1 to 3100)
+  @param hm SolarHijri month (1 to 12)
+  @param hd SolarHijri day (1 to 29/31)
   @return Julian Day number
 */
-function j2d(jy, jm, jd) {
-  var r = jalCal(jy)
-  return g2d(r.gy, 3, r.march) + (jm - 1) * 31 - div(jm, 7) * (jm - 7) + jd - 1
+function h2j(hy, hm, hd) {
+  var r = solarHijriCal(hy),
+    leap = r.leap ? 0:-1
+  return g2j(r.gy, 9, r.startDate) + (hm - 1) * 30 + div(hm, 7) * (hm - 7) + hd - 1 + (div(hm, 7) * leap)
 }
 
 /*
-  Converts the Julian Day number to a date in the Jalaali calendar.
+  Converts the Julian Day number to a date in the SolarHijri calendar.
 
-  @param jdn Julian Day number
+  @param hdn Julian Day number
   @return
-    jy: Jalaali year (1 to 3100)
-    jm: Jalaali month (1 to 12)
-    jd: Jalaali day (1 to 29/31)
+    hy: SolarHijri year (1 to 3100)
+    hm: SolarHijri month (1 to 12)
+    hd: SolarHijri day (1 to 29/31)
 */
-function d2j(jdn) {
-  var gy = d2g(jdn).gy // Calculate Gregorian year (gy).
-    , jy = gy - 621
-    , r = jalCal(jy)
-    , jdn1f = g2d(gy, 3, r.march)
-    , jd
-    , jm
+function j2h(hdn) {
+  var gy = j2g(hdn).gy // Calculate Gregorian year (gy).
+    , hy = gy - 621
+    , r = solarHijriCal(hy)
+    , hdn1l = g2j(gy, 9, r.startDate)// Julian day number of 1st Libra(Mizān)
+    , leap = r.leap ? 1:0
+    , hd
+    , hm
     , k
 
-  // Find number of days that passed since 1 Farvardin.
-  k = jdn - jdn1f
-  if (k >= 0) {
-    if (k <= 185) {
-      // The first 6 months.
-      jm = 1 + div(k, 31)
-      jd = mod(k, 31) + 1
-      return  { jy: jy
-              , jm: jm
-              , jd: jd
+    k = hdn - hdn1l
+    if(k >= 0 && k <= 99) {
+      // 23/9G to 31/12G
+      hm = 1 + div(k, 30)
+      hd = mod(k, 30) + 1
+      return  { hy: hy
+              , hm: hm
+              , hd: hd
               }
     } else {
-      // The remaining months.
-      k -= 186
+      // k is less than 0
+      // Previous SolarHijri year.
+      k += 365
+      hy -= 1
+      r = solarHijriCal(hy)
+      leap = r.leap ? 1:0
+
+
+      if(k <= 178) {
+        // the 4th to 6th month are 30 days.
+        k += leap
+        hm = 1 + div(k, 30)
+        hd = mod(k, 30) + 1
+        return  { hy: hy
+                , hm: hm
+                , hd: hd
+                }
+      } else {
+        // the 7th to 12th month are 31 days.
+        k -= 179
+        hm = 7 + div(k, 31)
+        hd = mod(k, 31) + 1
+        return  { hy: hy
+                , hm: hm
+                , hd: hd
+                }
+      }
+
     }
-  } else {
-    // Previous Jalaali year.
-    jy -= 1
-    k += 179
-    if (r.leap === 1)
-      k += 1
-  }
-  jm = 7 + div(k, 30)
-  jd = mod(k, 30) + 1
-  return  { jy: jy
-          , jm: jm
-          , jd: jd
-          }
+
+
 }
 
 /*
@@ -203,7 +174,7 @@ function d2j(jdn) {
   @param gd Calendar day of the month (1 to 28/29/30/31)
   @return Julian Day number
 */
-function g2d(gy, gm, gd) {
+function g2j(gy, gm, gd) {
   var d = div((gy + div(gm - 8, 6) + 100100) * 1461, 4)
       + div(153 * mod(gm + 9, 12) + 2, 5)
       + gd - 34840408
@@ -213,23 +184,23 @@ function g2d(gy, gm, gd) {
 
 /*
   Calculates Gregorian and Julian calendar dates from the Julian Day number
-  (jdn) for the period since jdn=-34839655 (i.e. the year -100100 of both
+  (hdn) for the period since hdn=-34839655 (i.e. the year -100100 of both
   calendars) to some millions years ahead of the present.
 
-  @param jdn Julian Day number
+  @param hdn Julian Day number
   @return
     gy: Calendar year (years BC numbered 0, -1, -2, ...)
     gm: Calendar month (1 to 12)
     gd: Calendar day of the month M (1 to 28/29/30/31)
 */
-function d2g(jdn) {
+function j2g(hdn) {
   var j
     , i
     , gd
     , gm
     , gy
-  j = 4 * jdn + 139361631
-  j = j + div(div(4 * jdn + 183187720, 146097) * 3, 4) * 4 - 3908
+  j = 4 * hdn + 139361631
+  j = j + div(div(4 * hdn + 183187720, 146097) * 3, 4) * 4 - 3908
   i = div(mod(j, 1461), 4) * 5 + 308
   gd = div(mod(i, 153), 5) + 1
   gm = mod(div(i, 153), 12) + 1

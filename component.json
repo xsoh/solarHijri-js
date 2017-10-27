@@ -1,17 +1,19 @@
 {
-  "name": "jalaali-js",
-  "version": "1.1.0",
-  "description": "Converts Gregorian and Jalaali calendars to each other",
+  "name": "solarHijri-js",
+  "version": "1.0.0",
+  "description": "Converts Gregorian and SolarHijri calendars to each other",
   "keywords": [
-    "jalaali",
-    "jalali",
-    "persian",
-    "khorshidi",
+    "solarHijri",
+    "hijri",
+    "hijriah",
+    "arabic",
+    "lunar",
+    "Umm al-Qura",
     "shamsi",
     "calendar",
     "date"
   ],
-  "repository": "jalaali/jalaali-js",
+  "repository": "xsoh/solarHijri-js",
   "scripts": [
     "index.js"
   ]
