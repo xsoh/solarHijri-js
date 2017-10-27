@@ -1,5 +1,5 @@
 {
-  "name": "solarHijri-js",
+  "name": "solarhijri-js",
   "version": "1.0.0",
   "description": "Converts Gregorian and SolarHijri calendars to each other",
   "main": "index.js",

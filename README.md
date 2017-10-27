@@ -8,7 +8,19 @@ SolarHijri calendar is solar Hijri calendar based on Umm al-Qura Solar Hijri cal
 
 ## Install
 
-soon...
+### Node.js
+
+Use [`npm`](https://npmjs.org) to install:
+
+```sh
+$ npm install --save solarhijri-js
+```
+
+Then import it:
+
+```js
+var solarHijri = require('solarhijri-js')
+```
 
 ## API
 
@@ -17,7 +29,7 @@ soon...
 Converts a Gregorian date to SolarHijri.
 
 ```js
-solarHijri.toSolarHijri(2017, 9, 23) // {  }
+solarHijri.toSolarHijri(2017, 9, 23) // { hy: 1396, hm: 1, hd: 1 }
 ```
 
 ### toSolarHijri(date)
