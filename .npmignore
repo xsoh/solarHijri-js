@@ -1,0 +1,17 @@
+*.log
+*.tgz
+*.lock
+
+src/
+package/
+node_modules/
+tests/
+
+tslint.json
+stylelint.json
+
+build.js 
+yarn.lock
+
+tslint.json
+tsconfig.json

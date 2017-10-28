@@ -2,7 +2,13 @@
   "name": "solarhijri-js",
   "version": "1.0.0",
   "description": "Converts Gregorian and SolarHijri calendars to each other",
-  "main": "index.js",
+  "main": "dist/solarHijri-js.common.js",
+  "module": "dist/solarHijri-js.esm.js",
+  "typings": "types/solarHijri-js.d.ts",
+  "directories": {
+    "dist": "dist",
+    "types": "types"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/xsoh/solarHijri-js"
@@ -19,7 +25,10 @@
     "date"
   ],
   "scripts": {
-    "test": "mocha --reporter spec --ui bdd --colors --check-leaks test.js"
+    "test": "mocha --reporter spec --ui bdd --colors --check-leaks test.js",
+    "compile": "node_modules/.bin/tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "build": "npm run clean && npm run compile && node build"
   },
   "author": "Suhail Alkowaileet",
   "license": "MIT",
@@ -27,8 +36,15 @@
     "url": "https://github.com/xsoh/solarHijri-js/issues"
   },
   "homepage": "https://github.com/xsoh/solarHijri-js",
+  "dependencies": {},
   "devDependencies": {
     "mocha": "^3.0.0",
-    "should": "^10.0.0"
+    "rimraf": "^2.6.2",
+    "rollup": "^0.50.0",
+    "rollup-plugin-buble": "^0.16.0",
+    "should": "^10.0.0",
+    "tslint": "^5.8.0",
+    "typescript": "^2.5.3",
+    "uglify-js": "^3.1.5"
   }
 }
